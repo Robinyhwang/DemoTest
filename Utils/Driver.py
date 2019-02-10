@@ -1,39 +1,50 @@
 import os
-
+from appium import webdriver as mobiledriver
 import yaml
 from selenium import webdriver
 import time
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+from Utils.abd_command import Command
 
 
 
 
 class Driver(object):
-
-
-
-
-        # self.driver.implicitly_wait(OVER_TIME)
+    def __init__(self):
+        pass
 
     def start(self):
         config_file = self.get_relative_path("", "env_settings")
         with open(config_file, 'r') as f:
             yaml_config = yaml.load(f)
             driver_name = yaml_config['browser']
-            chrome_driver_path = yaml_config['chrome_driver']
+            # chrome_driver_path = yaml_config['chrome_driver']
             url = yaml_config['url']
-            chrome_driver = chrome_driver_path.replace(
-                "~", os.path.expanduser('~'))
+            # chrome_driver = chrome_driver_path.replace(
+            #     "~", os.path.expanduser('~'))
         if driver_name == "android":
-            self.driver = webdriver.Android()
+            port = yaml_config['port']
+            apk_path = yaml_config['apk_path']
+            capabilities = {
+                "platformName": "Android",
+                # "deviceName": "127.0.0.1:21503",
+                "deviceName": Command().get_device(),
+                "app": apk_path,
+                'appWaitActivity':'com.sph.straitstimes.views.activities.TncActivity',
+                # "appActivity":'com.sph.straitstimes.views.activities.SplashActivity'
+                # "noReset": True
+            }
+            self.mobiledriver = mobiledriver.Remote("http://127.0.0.1:" + str(port) + "/wd/hub", capabilities)
+            self.agree_term_of_use()
+            self.swipe_welcome()
         elif driver_name == "Chrome":
-            self.driver=webdriver.Chrome()
+            self.driver = webdriver.Chrome()
             self.driver.maximize_window()
             self.driver.get(url)
-
-        return self.driver
+            self.close_advisement(By.CSS_SELECTOR, '#celtra-object-118')
+        return self.mobiledriver
 
 
     def get_relative_path(self, path, file_name):
@@ -90,8 +101,19 @@ class Driver(object):
     def maximize_window(self):
         self.driver.maximize_window()
 
-    def switch_iframe(self, frame):
-        self.driver.switch_to.frame(frame)
-    #
+    def close_advisement(self, by: By, path):
+        self.driver.switch_to.frame(self.driver.find_element_by_xpath('/html[1]/body[1]/div[13]/iframe[1]'))
+        self.driver.find_element(by, path).click()
+        self.driver.switch_to.default_content()
+        time.sleep(5)
+
     # def click(self):
     #     self.driver.
+    def agree_term_of_use(self):
+        time.sleep(10)
+        self.mobiledriver.find_element(By.ID, 'com.buuuk.st:id/btn_tnc_ok').click()
+
+    def swipe_welcome(self):
+        for i in range(6):
+            time.sleep(5)
+            self.mobiledriver.swipe(250,50,20,50)

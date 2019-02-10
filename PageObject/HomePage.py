@@ -14,8 +14,9 @@ class HomePage():
     #     super().__init__()
 
     __login_link = 'nav-login'
-    __close_button = 'celtra-object-118'
+    __close_button = '#celtra-object-118'
     __username="nav-user"
+    __headline="//span[contains(@class,'story-headline')]/a[1]"
     def get_url(self,url):
         return self.driver.start(url)
 
@@ -28,11 +29,9 @@ class HomePage():
 
     def advertisement_close(self):
         try:
-            iframe=self.driver.find_element_by_xpath("//iframe[contains(@frameborder,'0')]")
-            self.driver.switch_iframe(iframe)
-
-            self.driver.find_element(By.ID, self.__close_button).click()
-
+            fr=self.driver.find_element(By.XPATH,"/html[1]/body[1]/div[13]/iframe[1]")
+            self.driver.switch_iframe(fr)
+            self.driver.find_element(By.CSS_SELECTOR, self.__close_button).click()
         except NoSuchElementException:
             self.driver.find_element(By.CLASS_NAME, self.__login_link)
 
@@ -40,23 +39,17 @@ class HomePage():
     def username_display(self):
         username_after_login = self.driver.find_element(By.CLASS_NAME, self.__username)
         return username_after_login
+    @property
+    def main_article_text(self):
+        return self.driver.find_element(By.XPATH, self.__headline).text
 
-    def main_article(self):
-        main_article=self.driver.find_element_by_class_name('block-link')
-        main_article_image=self.driver.find_element_by_xpath("//div[@class='media-single']/ul[1]/li[1]/div[1]")
-        assert(main_article_image.is_displayed())
-        title=main_article.text()
-        main_article.click()
-        in_main_article_text=self.driver.find_element_by_class_name('headline node-title').text
-        assert(title==in_main_article_text)
-        in_main_article_images=self.driver.find_elements_by_class_name('media-entity')
-        assert(in_main_article_images is True)
 
+    @property
     def main_image(self):
-        self.driver.find_element_by_xpath("//div[@class='media-single']/ul[1]/li[1]/div[1]")
+        return self.driver.find_element_by_xpath("//img[@class='borealis image-style-retina_large borealis-js img-responsive']")
 
     def main_article_click(self):
-        self.driver.find_element(By.CLASS_NAME,'block-link')
+        self.driver.find_element(By.CLASS_NAME,'block-link').click()
 
     def main_article_titile(self):
         self.driver.find_element_by_xpath("//div[@class='media-single']/ul[1]/li[1]/div[1]")

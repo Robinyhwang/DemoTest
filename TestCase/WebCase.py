@@ -2,6 +2,7 @@ from time import sleep
 import requests
 from PageObject.HomePage import HomePage
 from PageObject.LoginPage import LoginPage
+from PageObject.ArticlePage import ArticlePage
 # from PageObject.LoginPage import LoginPage
 from ptest.decorator import TestClass, Test
 from selenium.webdriver.support import expected_conditions as EC
@@ -22,11 +23,17 @@ class WebTestCase(Driver):
         driver=Driver().start()
         homepage = HomePage(driver)
 
-        homepage.advertisement_close()
+        # homepage.advertisement_close()
         homepage.login_link_click()
         loginpage = LoginPage(driver)
         loginpage.login()
         assert (homepage.username_display.is_displayed())
+        assert(homepage.main_image.is_displayed())
+        homepage.main_article_click()
+        articlepage= ArticlePage(driver)
+        assert(driver.title)
+        assert(articlepage.headline == homepage.main_article_text)
+        assert(articlepage.main_image().is_displayed())
 
 
 
